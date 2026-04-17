@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:15          # PostgreSQL 15 공식 이미지 사용
+    env_file: .env              # .env 파일에서 DB 환경변수 읽기
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # DB 데이터 영구 저장 (컨테이너 삭제해도 유지)
+
+  web:
+    build: .                    # 현재 디렉토리의 Dockerfile로 이미지 빌드
+    command: python manage.py runserver 0.0.0.0:8000  # 컨테이너 실행 시 Django 서버 시작
+    volumes:
+      - .:/app                  # 로컬 코드 변경사항이 컨테이너에 실시간 반영
+    ports:
+      - "8000:8000"             # 로컬 8000포트 → 컨테이너 8000포트 연결
+    env_file: .env              # .env 파일에서 환경변수 읽기
+    depends_on:
+      - db                      # db 컨테이너가 먼저 실행된 후 web 실행
+
+volumes:
+  postgres_data:                # DB 데이터 저장용 볼륨 선언
