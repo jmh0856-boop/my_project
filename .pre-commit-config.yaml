@@ -1,0 +1,12 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace    # 줄 끝 공백 제거
+      - id: end-of-file-fixer      # 파일 끝 개행 추가
+      - id: check-merge-conflict   # merge 충돌 표시 감지
+
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black                  # 코드 자동 포맷팅
