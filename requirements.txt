@@ -3,3 +3,4 @@ djangorestframework             # REST API 개발 도구
 djangorestframework-simplejwt   # JWT 인증
 psycopg2-binary                 # PostgreSQL 연결 드라이버
 python-dotenv                   # .env 파일 읽기
+drf-spectacular

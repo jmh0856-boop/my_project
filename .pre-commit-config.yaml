@@ -10,3 +10,13 @@ repos:
     rev: 24.3.0
     hooks:
       - id: black                  # 코드 자동 포맷팅
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort                  # import 자동 정렬
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+      - id: mypy                   # 타입 오류 체크
