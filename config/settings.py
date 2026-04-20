@@ -1,5 +1,6 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 # .env 파일 읽기
@@ -11,7 +12,7 @@ SECRET_KEY = "django-insecure-#ce-gqe405ra@-s7j-c=s6!v^xx8ueh(i65s1+k25jr5$%8hyl
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list = []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     # 로컬 앱
     "accounts",
     "meals",
+    "drf_spectacular",  # Swagger 추가
 ]
 
 # 커스텀 User 모델 지정
@@ -78,12 +80,36 @@ DATABASES = {
 
 # JWT 인증 설정
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "core.authentication.CustomJWTAuthentication",  # 커스텀 JWT 인증
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",  # 기본 로그인 필요
-    ),
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",  # 추가
+}
+
+# Swagger 설정
+SPECTACULAR_SETTINGS = {
+    "TITLE": "혼밥 메뉴 추천 API",
+    "DESCRIPTION": "혼밥 메뉴 추천 서비스 API 문서",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": "/api/",
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+    },
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
+    "SECURITY": [{"BearerAuth": []}],
 }
 
 from datetime import timedelta
