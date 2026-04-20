@@ -1,4 +1,7 @@
-from drf_spectacular.utils import extend_schema
+import random
+from datetime import date, timedelta
+
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status  # HTTP 상태코드 모음 (200, 201, 400, 403, 404 등)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response  # API 응답을 JSON으로 만들어주는 클래스
@@ -98,4 +101,67 @@ class MealDetailView(APIView):  # 단건 조회(GET), 수정(PUT), 삭제(DELETE
         return Response(
             {"message": "삭제되었습니다."},
             status=status.HTTP_204_NO_CONTENT,  # 204 = 삭제 완료 (응답 본문 없음)
+        )
+
+
+class MealRecommendView(APIView):
+    permission_classes = [IsAuthenticated]  # 로그인한 유저만 접근 가능
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="category", description="카테고리 선택", required=False, type=str
+            ),
+            OpenApiParameter(
+                name="days",
+                description="최근 N일 이내 먹은 메뉴 제외",
+                required=False,
+                type=int,
+            ),
+            OpenApiParameter(
+                name="min_rating", description="최소 평점", required=False, type=int
+            ),
+        ]
+    )
+    def get(self, request):
+        category = request.query_params.get("category")  # 카테고리 파라미터
+        days = request.query_params.get("days")  # 최근 N일 제외 파라미터
+        min_rating = request.query_params.get("min_rating")  # 최소 평점 파라미터
+
+        meals = Meal.objects.filter(owner=request.user)  # 본인 식사기록만 조회
+
+        if category:
+            meals = meals.filter(category=category)  # 카테고리 필터
+
+        if days:
+            exclude_date = date.today() - timedelta(days=int(days))  # N일 전 날짜 계산
+            meals = meals.exclude(eaten_at__gte=exclude_date)  # N일 이내 먹은 메뉴 제외
+
+        if min_rating:
+            meals = meals.filter(rating__gte=min_rating)  # 최소 평점 필터
+
+        if not meals.exists():
+            return Response(
+                {"message": "조건에 맞는 식사기록이 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,  # 404 = 데이터 없음
+            )
+
+        meals = meals.order_by("-rating")  # 평점 높은 순 정렬
+        meal = random.choice(list(meals[:5]))  # 상위 5개 중 랜덤 추천
+
+        reasons = []  # 추천 이유 리스트
+        if days:
+            reasons.append(f"최근 {days}일 이내 먹지 않았고")  # 날짜 조건 이유
+        if min_rating:
+            reasons.append(f"평점 {min_rating}점 이상이며")  # 평점 조건 이유
+        reasons.append("평점이 높습니다.")  # 기본 이유
+
+        return Response(
+            {
+                "recommended_menu": meal.menu_name,  # 추천 메뉴명
+                "category": meal.category,  # 카테고리
+                "rating": meal.rating,  # 평점
+                "last_eaten": meal.eaten_at,  # 마지막으로 먹은 날짜
+                "reasons": " ".join(reasons),  # 추천 이유 문자열로 합치기
+            }
         )
