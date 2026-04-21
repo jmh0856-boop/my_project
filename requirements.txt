@@ -4,3 +4,4 @@ djangorestframework-simplejwt   # JWT 인증
 psycopg2-binary                 # PostgreSQL 연결 드라이버
 python-dotenv                   # .env 파일 읽기
 drf-spectacular
+gunicorn # 프로덕션 서버

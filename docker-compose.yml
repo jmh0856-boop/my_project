@@ -7,7 +7,7 @@ services:
 
   web:
     build: .                    # 현재 디렉토리의 Dockerfile로 이미지 빌드
-    command: python manage.py runserver 0.0.0.0:8000  # 컨테이너 실행 시 Django 서버 시작
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app                  # 로컬 코드 변경사항이 컨테이너에 실시간 반영
     ports:
