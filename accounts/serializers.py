@@ -1,23 +1,34 @@
-from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 from accounts.models import User
 
 
-class RegisterSerializer(serializers.ModelSerializer):
-    # 비밀번호 입력 시 화면에 안 보이게 설정
+# 회원가입 요청 (입력 데이터 검증)
+class RegisterRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    # write_only=True -> 응답에 비밀번호 포함 안함
+
+
+# 로그인 요청 (입력 데이터 검증)
+class LoginRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    # write_only=True -> 응답에 비밀번호 포함 안함
+
+
+# 유저 정보 응답 (출력 데이터 형식)
+class UserResponseSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = User
-        fields = ("username", "email", "password")
-
-    def create(self, validated_data):
-        # 비밀번호 해시 처리 후 저장
-        validated_data["password"] = make_password(validated_data["password"])
-        return super().create(validated_data)
+        fields = ("id", "username", "email", "created_at")
+        # 응답에 포함할 필드만 선택
 
 
-class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+# 토큰 응답 (출력 데이터 형식)
+class TokenResponseSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    token_type = serializers.CharField()

@@ -1,76 +1,83 @@
 # 이메일 + 비밀번호가 맞는지 확인해주는 django 내장함수
 from django.contrib.auth import authenticate
-from drf_spectacular.utils import extend_schema  # Swagger 요청 스키마 정의 데코레이터
-from rest_framework import status  # HTTP 상태코드 모음 (200, 201, 400, 401 등)
-from rest_framework.permissions import AllowAny  # 누구나 접근 가능 (로그인 없이도 됨)
-from rest_framework.response import Response  # API 응답을 JSON으로 만들어주는 클래스
-from rest_framework.views import APIView  # API 뷰의 기본 블래스 (DRF 제공)
-from rest_framework_simplejwt.tokens import RefreshToken  # JWT 토큰 발급해주는 클래스
+# Swagger 요청 스키마 정의 데코레이터
+from drf_spectacular.utils import extend_schema
+# HTTP 상태코드 모음 (200, 201, 400, 401 등)
+from rest_framework import status
+# 누구나 접근 가능 (로그인 없이도 됨)
+from rest_framework.permissions import AllowAny
+# API 응답을 JSON으로 만들어주는 클래스
+from rest_framework.response import Response
+# API 뷰의 기본 클래스 (DRF 제공)
+from rest_framework.views import APIView
+# JWT 토큰 발급해주는 클래스
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.serializers import LoginSerializer  # 우리가 만든 시리얼라이저 가져오기
-from accounts.serializers import RegisterSerializer
+from accounts.models import User
+# 요청/응답 Serializer 가져오기
+from accounts.serializers import (LoginRequestSerializer,
+                                  RegisterRequestSerializer,
+                                  TokenResponseSerializer,
+                                  UserResponseSerializer)
 
 
-class RegisterView(APIView):  # APIView 상속 -> POST, GET 등 HTTP 메서드 사용 가능
-    permission_classes = [AllowAny]  # 회원가입은 누구나 접근 가능 (로그인 안해도 됨)
+class RegisterView(APIView):
+    # 회원가입은 누구나 접근 가능 (로그인 안해도 됨)
+    permission_classes = [AllowAny]
 
-    @extend_schema(request=RegisterSerializer)
-    def post(
-        self, request
-    ):  # POST 오면 실행되는 함수, request = 클라이언트가 보낸 데이터
-        serializer = RegisterSerializer(
-            data=request.data
-        )  # 클라이언트가 보낸 JSON, RegisterSerializer 데이터 넣기
+    @extend_schema(request=RegisterRequestSerializer, responses=UserResponseSerializer)
+    def post(self, request):
+        # 클라이언트가 보낸 데이터 검증
+        serializer = RegisterRequestSerializer(data=request.data)
 
-        if serializer.is_valid():  # 데이터 검증 (username, email, password 형식 맞는지)
-            serializer.save()  # 검증 통과 -> DB에 저장 (creat() 실행됨)
-            return Response(
-                {"message": "회원가입이 완료되었습니다."},
-                status=status.HTTP_201_CREATED,  # 201 = 생성 완료
+        if serializer.is_valid():
+            # 유저 생성
+            user = User.objects.create_user(
+                email=serializer.validated_data["email"],
+                username=serializer.validated_data["username"],
+                password=serializer.validated_data["password"],
             )
+            # 응답 데이터 직렬화
+            response_serializer = UserResponseSerializer(user)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+        # 검증 실패 → 에러 메시지 반환 (400)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # 검증 실패 -> 에러 메세지 변환
-        # 400 = 잘못된 요청
 
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]  # 로그인도 누구나 접근 가능
+    # 로그인도 누구나 접근 가능
+    permission_classes = [AllowAny]
 
-    @extend_schema(request=LoginSerializer)
+    @extend_schema(request=LoginRequestSerializer, responses=TokenResponseSerializer)
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)  # 이메일 + 비밀번호 데이터 받기
+        # 요청 데이터 검증
+        serializer = LoginRequestSerializer(data=request.data)
 
-        if serializer.is_valid():  # 이메일 형식, 비밀번호 있는지 검증
+        if serializer.is_valid():
             email = serializer.validated_data["email"]
             password = serializer.validated_data["password"]
-            # validated_data = 검증 완료된 데이터에서 꺼내기
 
-            user = authenticate(request, email=email, password=password)
             # DB에서 이메일 + 비밀번호 일치하는 유저 찾기
-            # 없으면 None 반환
+            user = authenticate(request, email=email, password=password)
 
             if user is None:
+                # 401 = 인증 실패
                 return Response(
                     {"message": "이메일 또는 비밀번호가 올바르지 않습니다."},
-                    status=status.HTTP_401_UNAUTHORIZED,  # 401 = 인증 실패
+                    status=status.HTTP_401_UNAUTHORIZED,
                 )
 
-            refresh = RefreshToken.for_user(user)
             # 유저 정보로 JWT 토큰 생성
-            # refresh = Refresh Token
-            # refresh.access_token = Access Token
+            refresh = RefreshToken.for_user(user)
 
+            # Access Token 문자열로 변환해서 반환
             return Response(
                 {
-                    "access_token": str(
-                        refresh.access_token
-                    ),  # Access Token 문자열로 변환해서 반환
+                    "access_token": str(refresh.access_token),
                     "token_type": "bearer",
-                    # 토큰 타입 (항상 bearer)
                 }
             )
 
+        # 검증 실패 → 에러 메시지 반환 (400)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # 검증 실패 -> 에러 메세지 변환
-        # 400 = 잘못된 요청
