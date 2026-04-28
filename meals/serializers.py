@@ -7,7 +7,9 @@ from meals.models import Meal
 class MealRequestSerializer(serializers.Serializer):
     menu_name = serializers.CharField(max_length=100)
     category = serializers.ChoiceField(choices=Meal.CATEGORY_CHOICES)
-    rating = serializers.DecimalField(max_digits=2, decimal_places=1)
+    rating = serializers.DecimalField(
+        max_digits=2, decimal_places=1, min_value=1, max_value=5
+    )
     eaten_at = serializers.DateField()
 
 

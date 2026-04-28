@@ -10,6 +10,11 @@ class RegisterRequestSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     # write_only=True -> 응답에 비밀번호 포함 안함
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("이미 사용 중인 이메일입니다.")
+        return value
+
 
 # 로그인 요청 (입력 데이터 검증)
 class LoginRequestSerializer(serializers.Serializer):
@@ -31,4 +36,5 @@ class UserResponseSerializer(serializers.ModelSerializer):
 # 토큰 응답 (출력 데이터 형식)
 class TokenResponseSerializer(serializers.Serializer):
     access_token = serializers.CharField()
+    refresh_token = serializers.CharField()
     token_type = serializers.CharField()
