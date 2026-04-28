@@ -23,10 +23,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # 서드파티
     "rest_framework",
+    "drf_spectacular",  # Swagger 추가
     # 로컬 앱
+    "core",
     "accounts",
     "meals",
-    "drf_spectacular",  # Swagger 추가
 ]
 
 # 커스텀 User 모델 지정
