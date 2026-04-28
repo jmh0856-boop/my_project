@@ -14,8 +14,10 @@ class Meal(models.Model):
 
     menu_name = models.CharField(max_length=100)  # 메뉴명
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)  # 카테고리
-    rating = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]  # 1~5 제한
+    rating = models.DecimalField(
+        max_digits=2,
+        decimal_places=1,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],  # 1~5 제한
     )
     eaten_at = models.DateField()  # 먹은 날짜
     owner = models.ForeignKey(
