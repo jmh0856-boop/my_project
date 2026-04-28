@@ -3,10 +3,16 @@ from rest_framework import serializers
 from meals.models import Meal
 
 
-class MealSerializer(serializers.ModelSerializer):
-    # Meal 모델과 연결된 번역기 클래스
-    # ModelSerializer 상속 → JSON ↔ Python 변환 기능 포함
+# 식사기록 요청 Serializer (입력 데이터 검증)
+class MealRequestSerializer(serializers.Serializer):
+    menu_name = serializers.CharField(max_length=100)
+    category = serializers.ChoiceField(choices=Meal.CATEGORY_CHOICES)
+    rating = serializers.DecimalField(max_digits=2, decimal_places=1)
+    eaten_at = serializers.DateField()
 
+
+# 식사기록 응답 Serializer (출력 데이터 형식)
+class MealResponseSerializer(serializers.ModelSerializer):
     class Meta:  # 이 Serializer의 설정 정보 (Django 약속)
         model = Meal  # 어떤 모델과 연결할지 -> Meal 모델
         fields = [
