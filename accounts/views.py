@@ -16,8 +16,6 @@ from accounts.serializers import (LoginRequestSerializer,
                                   UserResponseSerializer)
 # services.py 호출
 from accounts.services import AuthService
-# exceptions.py 호출
-from core.exceptions import InvalidCredentialsException
 
 
 class RegisterView(APIView):
@@ -59,9 +57,7 @@ class LoginView(APIView):
                 password=serializer.validated_data["password"],
             )
 
-            if result is None:
-                raise InvalidCredentialsException()
-            return Response(result)
+            return Response(result, status=status.HTTP_200_OK)
 
         # 검증 실패 → 에러 메시지 반환 (400)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
