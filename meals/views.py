@@ -23,16 +23,15 @@ class MealListCreateView(APIView):
     def post(self, request):
         # 요청 데이터 검증
         serializer = MealRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            # 서비스 호출 → 식사기록 생성
-            meal = MealService.create_meal(
-                user=request.user,
-                data=serializer.validated_data,
-            )
-            return Response(
-                MealResponseSerializer(meal).data, status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = MealRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        meal = MealService.create_meal(
+            user=request.user,
+            data=serializer.validated_data,
+        )
+        return Response(
+            MealResponseSerializer(meal).data, status=status.HTTP_201_CREATED
+        )
 
 
 class MealDetailView(APIView):
@@ -50,16 +49,14 @@ class MealDetailView(APIView):
         # 수정
         meal = MealService.get_meal(pk=pk, user=request.user)
         serializer = MealRequestSerializer(meal, data=request.data)
-        if serializer.is_valid():
-            # 서비스 호출 → 수정
-            updated_meal = MealService.update_meal(
-                meal=meal,
-                data=serializer.validated_data,
-            )
-            return Response(
-                MealResponseSerializer(updated_meal).data, status=status.HTTP_200_OK
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        updated_meal = MealService.update_meal(
+            meal=meal,
+            data=serializer.validated_data,
+        )
+        return Response(
+            MealResponseSerializer(updated_meal).data, status=status.HTTP_200_OK
+        )
 
     def delete(self, request, pk):
         # 삭제
