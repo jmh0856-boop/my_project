@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User
+from core.exceptions import InvalidCredentialsException
 
 
 class AuthService:
@@ -24,7 +25,7 @@ class AuthService:
         user = authenticate(email=email, password=password)
 
         if user is None:
-            return None
+            raise InvalidCredentialsException()
 
         # JWT 토큰 발급
         refresh = RefreshToken.for_user(user)
