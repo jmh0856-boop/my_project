@@ -67,7 +67,6 @@ class MealDetailView(APIView):
         # 서비스 호출 → 삭제
         MealService.delete_meal(meal=meal)
         return Response(
-            {"message": "삭제되었습니다."},
             status=status.HTTP_204_NO_CONTENT,
         )
 
