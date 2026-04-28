@@ -31,4 +31,5 @@ class UserResponseSerializer(serializers.ModelSerializer):
 # 토큰 응답 (출력 데이터 형식)
 class TokenResponseSerializer(serializers.Serializer):
     access_token = serializers.CharField()
+    refresh_token = serializers.CharField()
     token_type = serializers.CharField()

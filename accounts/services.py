@@ -1,5 +1,6 @@
 # 이메일 + 비밀번호가 맞는지 확인해주는 django 내장함수
 from django.contrib.auth import authenticate
+
 # JWT 토큰 발급해주는 클래스
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -31,5 +32,6 @@ class AuthService:
         refresh = RefreshToken.for_user(user)
         return {
             "access_token": str(refresh.access_token),
+            "refresh_token": str(refresh),
             "token_type": "bearer",
         }
