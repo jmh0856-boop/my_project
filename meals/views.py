@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import NotFoundException
-from meals.serializers import MealSerializer
+from meals.serializers import MealRequestSerializer, MealResponseSerializer
 from meals.services import MealService
 
 
@@ -16,20 +16,22 @@ class MealListCreateView(APIView):
     def get(self, request):
         # 서비스 호출 → 본인 식사기록 목록 조회
         meals = MealService.get_meals(user=request.user)
-        serializer = MealSerializer(meals, many=True)
+        serializer = MealResponseSerializer(meals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=MealSerializer)
+    @extend_schema(request=MealRequestSerializer, responses=MealResponseSerializer)
     def post(self, request):
         # 요청 데이터 검증
-        serializer = MealSerializer(data=request.data)
+        serializer = MealRequestSerializer(data=request.data)
         if serializer.is_valid():
             # 서비스 호출 → 식사기록 생성
             meal = MealService.create_meal(
                 user=request.user,
                 data=serializer.validated_data,
             )
-            return Response(MealSerializer(meal).data, status=status.HTTP_201_CREATED)
+            return Response(
+                MealResponseSerializer(meal).data, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -40,14 +42,14 @@ class MealDetailView(APIView):
     def get(self, request, pk):
         # 단건 조회
         meal = MealService.get_meal(pk=pk, user=request.user)
-        serializer = MealSerializer(meal)
+        serializer = MealResponseSerializer(meal)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=MealSerializer)
+    @extend_schema(request=MealRequestSerializer, responses=MealResponseSerializer)
     def put(self, request, pk):
         # 수정
         meal = MealService.get_meal(pk=pk, user=request.user)
-        serializer = MealSerializer(meal, data=request.data)
+        serializer = MealRequestSerializer(meal, data=request.data)
         if serializer.is_valid():
             # 서비스 호출 → 수정
             updated_meal = MealService.update_meal(
@@ -55,7 +57,7 @@ class MealDetailView(APIView):
                 data=serializer.validated_data,
             )
             return Response(
-                MealSerializer(updated_meal).data, status=status.HTTP_200_OK
+                MealResponseSerializer(updated_meal).data, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
