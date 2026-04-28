@@ -93,8 +93,23 @@ class MealRecommendView(APIView):
     )
     def get(self, request):
         category = request.query_params.get("category")
-        days = request.query_params.get("days")
-        min_rating = request.query_params.get("min_rating")
+
+        try:
+            days = (
+                int(request.query_params.get("days"))
+                if request.query_params.get("days")
+                else None
+            )
+            min_rating = (
+                float(request.query_params.get("min_rating"))
+                if request.query_params.get("min_rating")
+                else None
+            )
+        except ValueError:
+            return Response(
+                {"error": "올바른 숫자를 입력해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # 서비스 호출 → 추천
         meal, reasons = MealService.recommend_meal(
