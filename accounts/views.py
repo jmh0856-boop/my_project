@@ -21,7 +21,7 @@ from accounts.serializers import (
     UserResponseSerializer,
 )
 
-# services.py 호출
+# 회원가입/로그인 비지니스 로직
 from accounts.services import AuthService
 
 

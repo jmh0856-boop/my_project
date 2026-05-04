@@ -1,12 +1,15 @@
-from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from drf_spectacular.utils import OpenApiParameter, extend_schema  # Swagger 문서화 도구
+from rest_framework import status  # HTTP 상태코드 모음
+from rest_framework.permissions import IsAuthenticated  # 로그인 유저만 접근 가능
+from rest_framework.response import Response  # JSON 응답 클래스
+from rest_framework.views import APIView  # API 뷰 기본 클래스
 
-from core.exceptions import NotFoundException
-from meals.serializers import MealRequestSerializer, MealResponseSerializer
-from meals.services import MealService
+from core.exceptions import NotFoundException  # 데이터 없음 예외
+from meals.serializers import (  # 요청/응답 Serializer
+    MealRequestSerializer,
+    MealResponseSerializer,
+)
+from meals.services import MealService  # 식사기록 비즈니스 로직
 
 
 class MealListCreateView(APIView):
@@ -22,7 +25,6 @@ class MealListCreateView(APIView):
     @extend_schema(request=MealRequestSerializer, responses=MealResponseSerializer)
     def post(self, request):
         # 요청 데이터 검증
-        serializer = MealRequestSerializer(data=request.data)
         serializer = MealRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         meal = MealService.create_meal(

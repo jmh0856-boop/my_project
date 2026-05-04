@@ -19,6 +19,7 @@ class MealService:
 
     @staticmethod
     def get_meal(pk, user):
+        # 식사기록 단건 조회 및 권한 확인
         try:
             meal = Meal.objects.get(pk=pk)
         except Meal.DoesNotExist:
@@ -61,7 +62,7 @@ class MealService:
             meals = meals.filter(rating__gte=min_rating)
 
         if not meals.exists():
-            return None, None
+            return None, None  # 조건에 맞는 식사기록 없으면 None 반환
 
         # 평점 높은 순 정렬 후 상위 5개 중 랜덤 추천
         meals = meals.order_by("-rating")
