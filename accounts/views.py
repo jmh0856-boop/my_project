@@ -21,7 +21,7 @@ from accounts.serializers import (
     UserResponseSerializer,
 )
 
-# 회원가입/로그인 비지니스 로직
+# 회원가입/로그인 비즈니스 로직
 from accounts.services import AuthService
 
 
@@ -29,7 +29,11 @@ class RegisterView(APIView):
     # 회원가입은 누구나 접근 가능 (로그인 안해도 됨)
     permission_classes = [AllowAny]
 
-    @extend_schema(request=RegisterRequestSerializer, responses=UserResponseSerializer)
+    @extend_schema(
+        summary="회원가입",
+        request=RegisterRequestSerializer,
+        responses=UserResponseSerializer,
+    )
     def post(self, request):
         # 클라이언트가 보낸 데이터 검증
         serializer = RegisterRequestSerializer(data=request.data)
@@ -47,7 +51,11 @@ class LoginView(APIView):
     # 로그인도 누구나 접근 가능
     permission_classes = [AllowAny]
 
-    @extend_schema(request=LoginRequestSerializer, responses=TokenResponseSerializer)
+    @extend_schema(
+        summary="로그인",
+        request=LoginRequestSerializer,
+        responses=TokenResponseSerializer,
+    )
     def post(self, request):
         # 요청 데이터 검증
         serializer = LoginRequestSerializer(data=request.data)

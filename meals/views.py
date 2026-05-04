@@ -16,13 +16,18 @@ class MealListCreateView(APIView):
     # 목록 조회(GET)와 생성(POST)을 담당하는 뷰
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="식사기록 목록 조회", responses=MealResponseSerializer)
     def get(self, request):
         # 서비스 호출 → 본인 식사기록 목록 조회
         meals = MealService.get_meals(user=request.user)
         serializer = MealResponseSerializer(meals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=MealRequestSerializer, responses=MealResponseSerializer)
+    @extend_schema(
+        summary="식사기록 생성",
+        request=MealRequestSerializer,
+        responses=MealResponseSerializer,
+    )
     def post(self, request):
         # 요청 데이터 검증
         serializer = MealRequestSerializer(data=request.data)
@@ -40,13 +45,18 @@ class MealDetailView(APIView):
     # 단건 조회(GET), 수정(PUT), 삭제(DELETE)를 담당하는 뷰
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(summary="식사기록 단건 조회", responses=MealResponseSerializer)
     def get(self, request, pk):
         # 단건 조회
         meal = MealService.get_meal(pk=pk, user=request.user)
         serializer = MealResponseSerializer(meal)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @extend_schema(request=MealRequestSerializer, responses=MealResponseSerializer)
+    @extend_schema(
+        summary="식사기록 수정",
+        request=MealRequestSerializer,
+        responses=MealResponseSerializer,
+    )
     def put(self, request, pk):
         # 수정
         meal = MealService.get_meal(pk=pk, user=request.user)
@@ -60,6 +70,7 @@ class MealDetailView(APIView):
             MealResponseSerializer(updated_meal).data, status=status.HTTP_200_OK
         )
 
+    @extend_schema(summary="식사기록 삭제")
     def delete(self, request, pk):
         # 삭제
         meal = MealService.get_meal(pk=pk, user=request.user)
@@ -75,6 +86,7 @@ class MealRecommendView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        summary="메뉴 추천",
         parameters=[
             OpenApiParameter(
                 name="category", description="카테고리 선택", required=False, type=str
@@ -88,7 +100,7 @@ class MealRecommendView(APIView):
             OpenApiParameter(
                 name="min_rating", description="최소 평점", required=False, type=int
             ),
-        ]
+        ],
     )
     def get(self, request):
         category = request.query_params.get("category")
