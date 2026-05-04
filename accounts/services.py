@@ -12,7 +12,7 @@ class AuthService:
 
     @staticmethod
     def register(email, username, password):
-        # 유저 생성
+        # 유저 생성 후 반환
         user = User.objects.create_user(
             email=email,
             username=username,

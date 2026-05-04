@@ -11,6 +11,7 @@ class RegisterRequestSerializer(serializers.Serializer):
     # write_only=True -> 응답에 비밀번호 포함 안함
 
     def validate_email(self, value):
+        # 이메일 중복 검증
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("이미 사용 중인 이메일입니다.")
         return value

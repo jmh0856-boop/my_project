@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -112,8 +113,6 @@ SPECTACULAR_SETTINGS = {
     },
     "SECURITY": [{"BearerAuth": []}],
 }
-
-from datetime import timedelta
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),  # 액세스 토큰 1시간

@@ -2,7 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager  # 유저 매니저 �
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
-from core.models import TimeStampedModel  # 공통 날짜 필드 (create_at, updated_at)
+from core.models import TimeStampedModel  # 공통 날짜 필드 (created_at, updated_at)
 
 
 class UserManager(BaseUserManager):  # 유저 생성 로직을 담당하는 매니저 클래스
@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):  # 유저 생성 로직을 담당하는 매�
         )  # User 모델 인스턴스 생성 (아직 DB 저장 안됨)
         user.set_password(password)  # 비밀번호 해시 처리
         user.save(using=self._db)  # 현재 사용 중인 DB에 저장
-        return user  # 생성된 유저 변환
+        return user  # 생성된 유저 반환
 
     def create_superuser(self, email, username, password=None, **extra_fields):
         # 슈퍼유저 생성 메서드 (python manage.py createsuperuser 실행 시 호출)
