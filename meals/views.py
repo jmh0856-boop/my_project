@@ -49,7 +49,8 @@ class MealDetailView(APIView):
     @extend_schema(summary="식사기록 단건 조회", responses=MealResponseSerializer)
     def get(self, request, pk):
         # 단건 조회
-        meal = MealService.get_meal(pk=pk, user=request.user)
+        meal = MealService.get_meal(pk=pk)
+        self.check_object_permissions(request, meal)
         serializer = MealResponseSerializer(meal)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -60,7 +61,8 @@ class MealDetailView(APIView):
     )
     def put(self, request, pk):
         # 수정
-        meal = MealService.get_meal(pk=pk, user=request.user)
+        meal = MealService.get_meal(pk=pk)
+        self.check_object_permissions(request, meal)
         serializer = MealRequestSerializer(meal, data=request.data)
         serializer.is_valid(raise_exception=True)
         updated_meal = MealService.update_meal(
@@ -74,8 +76,9 @@ class MealDetailView(APIView):
     @extend_schema(summary="식사기록 삭제")
     def delete(self, request, pk):
         # 삭제
-        meal = MealService.get_meal(pk=pk, user=request.user)
+        meal = MealService.get_meal(pk=pk)
         # 서비스 호출 → 삭제
+        self.check_object_permissions(request, meal)
         MealService.delete_meal(meal=meal)
         return Response(
             status=status.HTTP_204_NO_CONTENT,
@@ -105,25 +108,9 @@ class MealRecommendView(APIView):
     )
     def get(self, request):
         category = request.query_params.get("category")
+        days = request.query_params.get("days")
+        min_rating = request.query_params.get("min_rating")
 
-        try:
-            days = (
-                int(request.query_params.get("days"))
-                if request.query_params.get("days")
-                else None
-            )
-            min_rating = (
-                float(request.query_params.get("min_rating"))
-                if request.query_params.get("min_rating")
-                else None
-            )
-        except ValueError:
-            return Response(
-                {"error": "올바른 숫자를 입력해주세요."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # 서비스 호출 → 추천
         meal, reasons = MealService.recommend_meal(
             user=request.user,
             category=category,
