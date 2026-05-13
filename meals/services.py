@@ -1,7 +1,7 @@
 import random
 from datetime import date, timedelta
 
-from core.exceptions import NotFoundException, PermissionDeniedException
+from core.exceptions import InvalidInputException, NotFoundException
 from meals.models import Meal
 
 
@@ -18,15 +18,12 @@ class MealService:
         return Meal.objects.create(owner=user, **data)
 
     @staticmethod
-    def get_meal(pk, user):
-        # 식사기록 단건 조회 및 권한 확인
+    def get_meal(pk):
+        # 식사기록 단건 조회
         try:
             meal = Meal.objects.get(pk=pk)
         except Meal.DoesNotExist:
             raise NotFoundException()
-
-        if meal.owner != user:
-            raise PermissionDeniedException()
 
         return meal
 
@@ -45,6 +42,12 @@ class MealService:
 
     @staticmethod
     def recommend_meal(user, category=None, days=None, min_rating=None):
+        try:
+            days = int(days) if days else None
+            min_rating = float(min_rating) if min_rating else None
+        except ValueError:
+            raise InvalidInputException()
+
         # 본인 식사기록만 조회
         meals = Meal.objects.filter(owner=user)
 
