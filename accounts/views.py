@@ -44,7 +44,10 @@ class RegisterView(APIView):
             password=serializer.validated_data["password"],
         )
         response_serializer = UserResponseSerializer(user)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "회원가입이 완료되었습니다.", "user": response_serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
