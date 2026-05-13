@@ -24,10 +24,6 @@ class MealService:
             meal = Meal.objects.get(pk=pk)
         except Meal.DoesNotExist:
             raise NotFoundException()
-
-        if meal.owner != user:
-            raise PermissionDeniedException()
-
         return meal
 
     @staticmethod
