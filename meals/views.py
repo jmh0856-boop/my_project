@@ -5,6 +5,7 @@ from rest_framework.response import Response  # JSON 응답 클래스
 from rest_framework.views import APIView  # API 뷰 기본 클래스
 
 from core.exceptions import NotFoundException  # 데이터 없음 예외
+from core.permissions import IsOwner
 from meals.serializers import (  # 요청/응답 Serializer
     MealRequestSerializer,
     MealResponseSerializer,
@@ -43,7 +44,7 @@ class MealListCreateView(APIView):
 
 class MealDetailView(APIView):
     # 단건 조회(GET), 수정(PUT), 삭제(DELETE)를 담당하는 뷰
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     @extend_schema(summary="식사기록 단건 조회", responses=MealResponseSerializer)
     def get(self, request, pk):
