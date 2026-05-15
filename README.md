@@ -2,6 +2,8 @@
 
 혼자 밥을 먹을 때 메뉴를 고르기 어려운 사람들을 위한 **식사기록 기반 메뉴 추천 API 서비스**입니다.
 
+배포링크: http://54.180.114.107:8000/api/docs/
+
 ---
 
 ## 🛠 기술 스택
@@ -69,6 +71,7 @@ http://localhost:8000/api/docs/
 - 이메일 중복 검증
 - 비밀번호 해시 처리
 - JWT 토큰 발급 (Access Token, Refresh Token)
+- Refresh Token으로 Access Token 갱신
 
 ### 2. 식사기록 CRUD
 - 식사기록 생성, 조회, 수정, 삭제
@@ -91,6 +94,7 @@ http://localhost:8000/api/docs/
 |---|---|---|---|
 | POST | `/api/auth/register/` | 회원가입 | 불필요 |
 | POST | `/api/auth/login/` | 로그인 | 불필요 |
+| POST | `/api/auth/token/refresh/` | 토큰 갱신 | 불필요 |
 | GET | `/api/meals/` | 식사기록 목록 조회 | 필요 |
 | POST | `/api/meals/` | 식사기록 생성 | 필요 |
 | GET | `/api/meals/{id}/` | 식사기록 단건 조회 | 필요 |
@@ -155,10 +159,40 @@ models.py   → DB 접근
 
 ---
 
+## 🌿 브랜치 전략 & 커밋 컨벤션
+
+### 브랜치 전략
+| 브랜치 | 용도 |
+|---|---|
+| `main` | 최종 배포 브랜치 |
+| `develop` | 개발 통합 브랜치 |
+| `feat/` | 새 기능 개발 |
+| `fix/` | 버그 수정 |
+| `refactor/` | 코드 개선 |
+| `docs/` | 문서 작업 |
+
+### 커밋 메시지 규칙
+| 태그 | 용도 |
+|---|---|
+| `feat` | 새 기능 추가 |
+| `fix` | 버그 수정 |
+| `refactor` | 코드 개선 |
+| `docs` | 문서 수정 |
+| `chore` | 설정, 환경 변경 |
+
+**예시:**
+```
+feat: refresh token 갱신 API 추가
+fix: ALLOWED_HOSTS EC2 IP 추가
+refactor: 타입 변환 로직 서비스로 이동
+```
+
+---
+
 ## 💡 구현 포인트
 
 - **역할 분리**: View, Serializer, Service, Model 레이어 분리
 - **공통 모듈**: `core` 앱에서 인증, 권한, 예외 공통 관리
 - **커스텀 예외**: 401, 403, 404 상황별 예외 처리
-- **JWT 인증**: Access Token + Refresh Token 발급
+- **JWT 인증**: Access Token + Refresh Token 발급 및 갱신
 - **Docker**: PostgreSQL + Django 컨테이너 구성
